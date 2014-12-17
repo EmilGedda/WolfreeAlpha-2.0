@@ -54,11 +54,14 @@
     <Compile Include="CookieAwareWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="GuerillaEmail.cs" />
+    <Compile Include="IBasicEmail.cs" />
+    <Compile Include="ITemporaryMail.cs" />
     <Compile Include="Network.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomSingleton.cs" />
-    <Compile Include="TempMail.cs" />
+    <Compile Include="GuerillaMail.cs" />
     <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>

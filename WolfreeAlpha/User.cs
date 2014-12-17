@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Web.ModelBinding;
+using WolfreeAlpha.Mail;
 
 namespace WolfreeAlpha
 {
@@ -12,15 +13,15 @@ namespace WolfreeAlpha
 			FirstName = firstname;
 			LastName = lastname;
             const string passwordCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-			string pass = RandomString(RandomSingleton.Instance, passwordCharset);
-			Password = String.Format("{0}{1}{2}!",Char.ToUpper(pass[0]), Char.ToLower(pass[1]), pass.Substring(2)); 
-									//Force one upper, one lower and one special to meet the (future) password requirements.
+            Password = RandomString(RandomSingleton.Instance, passwordCharset);
+            email = new GuerillaMailAccount(firstname, lastname);
+									
 		}
 
 		public string FirstName { get; set; }
 		public string LastName { get; set; }
 		public string Password { get; set; }
-		private TempMail email;
+	    private ITemporaryMail email;
 		public string FullName
 		{
 			get { return String.Concat(FirstName, " ", LastName); }
