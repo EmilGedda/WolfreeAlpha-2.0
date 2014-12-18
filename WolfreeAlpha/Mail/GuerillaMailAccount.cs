@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace WolfreeAlpha.Mail
 {
-    internal class GuerillaMailAccount : MailAccountBase
+    internal sealed class GuerillaMailAccount : MailAccountBase
     {
         private const string Url = "http://api.guerrillamail.com/ajax.php";
         private static readonly string[] domains =
@@ -18,9 +18,10 @@ namespace WolfreeAlpha.Mail
 
         private string token;
 
-        public GuerillaMailAccount(string firstname, string lastname) : this()
+        public GuerillaMailAccount(string firstname, string lastname)
         {
             SetMail(firstname, lastname);
+			FetchEmails();
         }
 
         public GuerillaMailAccount()
@@ -29,7 +30,6 @@ namespace WolfreeAlpha.Mail
 
         protected override string FetchAddress()
         {
-            if (Address != null) return Address;
             string response =
                 Network.GET(String.Format("{0}?f=get_email_address&ip={1}&agent={2}", Url, Network.IP,
                     HttpUtility.UrlEncode(Network.Agent)));
@@ -38,8 +38,9 @@ namespace WolfreeAlpha.Mail
             return values["email_addr"];
         }
 
-        public void SetMail(string firstname, string lastname)
+	    private void SetMail(string firstname, string lastname)
         {
+			if(Address == null) SetMail(firstname, lastname);
             firstname = firstname.ToLower();
             lastname = lastname.ToLower();
             string response =
@@ -51,12 +52,18 @@ namespace WolfreeAlpha.Mail
             Address = String.Format("{0}.{1}@{2}", firstname, lastname, domain);
         }
 
-        private void FetchEmails()
+        public override List<IBasicEmail> FetchEmails()
         {
             string response = Network.GET(String.Format("{0}?f=get_email_list&sid_token={1}&seq=0&offset=0", Url, token));
             var mailbox = JsonConvert.DeserializeObject<JObject>(response);
             var guerillaemails = mailbox["list"].ToObject<List<GuerillaEmail>>();
-            emails = guerillaemails.ToList<IBasicEmail>();
+	        foreach (var guerillaemail in guerillaemails)
+	        {
+		        string mailJSON = Network.GET(String.Format("{0}?f=fetch_email&sid_token={1}&email_id={2}", Url, token, guerillaemail.ID));
+		        guerillaemail.Body = (string)JsonConvert.DeserializeObject<JToken>(mailJSON)["mail_body"];
+	        }
+
+	        return emails = guerillaemails.ToList<IBasicEmail>();
         }
     }
 }
