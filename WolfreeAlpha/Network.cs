@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -15,24 +16,38 @@ namespace WolfreeAlpha
 			get { return agent; }	
 		}
 
-		private static CookieAwareWebClient webclient = new CookieAwareWebClient();
+		public static string IP
+		{
+			get
+			{
+				if (String.IsNullOrEmpty(ip))
+					ip = (webclient ?? Init()).DownloadString("http://ipz.emilgedda.se/");
+				return ip;
+			}
+		}
+
+		private static CookieAwareWebClient webclient;
+		private static string ip;
 
 		private  const string agent =
 			"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36";
 
-		public static string GetIP()
+		private static CookieAwareWebClient Init()
 		{
-			return "83.250.10.156";
+			webclient = new CookieAwareWebClient();
+			webclient.Headers[HttpRequestHeader.UserAgent] = Agent;
+			webclient.Headers[HttpRequestHeader.Referer] = "http://www.wolframalpha.com/";
+			webclient.Headers.Add("Origin", "http://www.wolframalpha.com/");
+			return webclient;
 		}
-
 		public static string GET(string url)
 		{
-			return webclient.DownloadString(url);
+			return (webclient ?? Init()).DownloadString(url);
 		}
 
-		public static string POST(string url, string data)
+		public static string POST(string url, NameValueCollection data)
 		{
-			return "";
+			return Encoding.UTF8.GetString((webclient ?? Init()).UploadValues(url, data));
 		}
 	}
 }
