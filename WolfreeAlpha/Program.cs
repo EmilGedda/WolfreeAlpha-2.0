@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
-using WolfreeAlpha.Mail;
 
 namespace WolfreeAlpha
 {
-	class Program
+	internal class Program
 	{
-		static void Main(string[] args)
+		private static void Main(string[] args)
 		{
 			try
 			{
@@ -42,7 +36,6 @@ namespace WolfreeAlpha
 				Console.WriteLine(ex.Message);
 			}
 			Console.ReadKey(true);
-
 		}
 	}
 }

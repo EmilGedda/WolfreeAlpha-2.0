@@ -83,7 +83,8 @@ namespace WolfreeAlpha
 				cookie.Domain = value[1] != string.Empty ? value[1] : host;
 		}
 
-		private static IEnumerable<Cookie> ConvertCookieArraysToCookieCollection(IEnumerable<string> cookieStringList, string host)
+		private static IEnumerable<Cookie> ConvertCookieArraysToCookieCollection(IEnumerable<string> cookieStringList,
+			string host)
 		{
 			foreach (string t in cookieStringList)
 			{
