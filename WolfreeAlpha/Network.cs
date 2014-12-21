@@ -43,6 +43,7 @@ namespace WolfreeAlpha
 			webclient.Headers[HttpRequestHeader.UserAgent] = Agent;
 			webclient.Headers[HttpRequestHeader.Referer] = "http://www.wolframalpha.com/";
 			webclient.Headers.Add("Origin", "http://www.wolframalpha.com/");
+			webclient.Proxy = null;
 			return webclient;
 		}
 

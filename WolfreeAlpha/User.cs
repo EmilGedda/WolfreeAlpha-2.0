@@ -8,25 +8,19 @@ namespace WolfreeAlpha
 {
 	internal class User
 	{
-		private readonly ITemporaryMail mailAccount;
-
 		private User(string firstname, string lastname)
 		{
 			FirstName = firstname;
 			LastName = lastname;
 			const string passwordCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 			Password = RandomString(RandomSingleton.Instance, passwordCharset);
-			mailAccount = new GuerillaMailAccount(firstname, lastname);
 		}
 
 		public string FirstName { get; set; }
 		public string LastName { get; set; }
 		public string Password { get; set; }
 
-		public ITemporaryMail EmailAccount
-		{
-			get { return mailAccount; }
-		}
+		public ITemporaryMail EmailAccount { get; set; }
 
 		public string FullName
 		{

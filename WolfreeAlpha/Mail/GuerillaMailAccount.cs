@@ -19,6 +19,10 @@ namespace WolfreeAlpha.Mail
 
 		private string token;
 
+		public GuerillaMailAccount(User user) : this(user.FirstName, user.LastName)
+		{
+			
+		}
 		public GuerillaMailAccount(string firstname, string lastname)
 		{
 			SetMail(firstname, lastname);
@@ -42,11 +46,9 @@ namespace WolfreeAlpha.Mail
 		private void SetMail(string firstname, string lastname)
 		{
 			if (Address == null) SetMail(firstname, lastname);
-			firstname = firstname.ToLower();
-			lastname = lastname.ToLower();
 			string response =
-				Network.GET(String.Format("{0}?f=set_email_user&sid_token={1}&email_user={2}.{3}", Url, token, firstname,
-					lastname));
+				Network.GET(String.Format("{0}?f=set_email_user&sid_token={1}&email_user={2}.{3}", Url, token,
+				firstname.ToLower(), lastname.ToLower()));
 			var success = (bool) JsonConvert.DeserializeObject<JObject>(response)["auth"]["success"];
 			if (!success) throw new Exception("Uanble to set custom email");
 			string domain = domains[RandomSingleton.Instance.Next(5)];
