@@ -13,10 +13,10 @@ namespace WolfreeAlpha
 		{
 			u => u.EmailAccount = new GuerillaMailAccount(u),
 			u => u.CreateAccount(),
-			u => WaitFor(user => user.EmailAccount.HasRegistrationMail(), u,
+			u => WaitForMail(user => user.EmailAccount.HasRegistrationMail(), u,
 					"Unable to create account! No registration email found."),
 			u => u.StartProTrial(),
-			u => WaitFor(user => user.EmailAccount.HasVerificationMail(), u,
+			u => WaitForMail(user => user.EmailAccount.HasVerificationMail(), u,
 					"Unable to start pro trial! No verification email found."),
 			u => u.VerifyAccount()
 		};
@@ -61,14 +61,13 @@ namespace WolfreeAlpha
 			Console.WriteLine(message);
 		}
 
-		private static void WaitFor(Predicate<User> pred, User user, string exceptionMsg)
+		private static void WaitForMail(Predicate<User> pred, User user, string exceptionMsg)
 		{
 			user.EmailAccount.FetchEmails();
 			for (int i = 0; !pred.Invoke(user); i++)
 			{
 				Thread.Sleep(500);
-				if (i == 20)
-					throw new Exception(exceptionMsg);
+				if (i == 20) throw new Exception(exceptionMsg);
 				user.EmailAccount.FetchEmails();
 			}
 		}
