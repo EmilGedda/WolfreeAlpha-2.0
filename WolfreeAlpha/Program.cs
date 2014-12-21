@@ -1,38 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 using WolfreeAlpha.Mail;
 
 namespace WolfreeAlpha
 {
-	class Program
+	internal static class Program
 	{
-		static void Main(string[] args)
+		private static Stopwatch sw;
+
+		private static readonly Action<User>[] flow =
+		{
+			u => u.EmailAccount = new GuerillaMailAccount(u),
+			u => u.CreateAccount(),
+			u => WaitForMail(user => user.EmailAccount.HasRegistrationMail(), u,
+					"Unable to create account! No registration email found."),
+			u => u.StartProTrial(),
+			u => WaitForMail(user => user.EmailAccount.HasVerificationMail(), u,
+					"Unable to start pro trial! No verification email found."),
+			u => u.VerifyAccount()
+		};
+
+		private static readonly string[] messages =
+		{
+			"Creating temporary email", "Creating wolfram alpha account", "Waiting for registration mail...",
+			"Starting pro trial", "Waiting for verification mail...", "Verifying account"
+		};
+
+		private static void Main(string[] args)
 		{
 			try
 			{
+				sw = Stopwatch.StartNew();
+				PrintLine("Generating name");
 				User user = User.CreateRandomUser();
-				user.CreateAccount();
-				for (int i = 0; !user.EmailAccount.HasRegistrationMail(); i++)
+				for (int i = 0; i < flow.Length; i++)
 				{
-					user.EmailAccount.FetchEmails();
-					Thread.Sleep(100);
-					if (i == 200)
-						throw new Exception("Unable to create account! No registration email found.");
+					PrintLine(messages[i]);
+					flow[i].Invoke(user);
 				}
-				user.StartProTrial();
-				for (int i = 0; !user.EmailAccount.HasVerificationMail(); i++)
-				{
-					user.EmailAccount.FetchEmails();
-					Thread.Sleep(100);
-					if (i == 200)
-						throw new Exception("Unable to start pro trial! No verification email found.");
-				}
-				user.VerifyAccount();
+				PrintLine("Done");
+				sw.Stop();
+				Console.WriteLine();
 				Console.WriteLine("Email: {0}", user.EmailAccount.Address);
 				Console.WriteLine("Password: {0}", user.Password);
 			}
@@ -42,7 +51,25 @@ namespace WolfreeAlpha
 				Console.WriteLine(ex.Message);
 			}
 			Console.ReadKey(true);
+		}
 
+		private static void PrintLine(string message)
+		{
+			Console.ForegroundColor = ConsoleColor.Gray;
+			Console.Write("[{0:00.000}] ", sw.Elapsed.TotalSeconds);
+			Console.ForegroundColor = ConsoleColor.White;
+			Console.WriteLine(message);
+		}
+
+		private static void WaitForMail(Predicate<User> pred, User user, string exceptionMsg)
+		{
+			user.EmailAccount.FetchEmails();
+			for (int i = 0; !pred.Invoke(user); i++)
+			{
+				Thread.Sleep(500);
+				if (i == 20) throw new Exception(exceptionMsg);
+				user.EmailAccount.FetchEmails();
+			}
 		}
 	}
 }
